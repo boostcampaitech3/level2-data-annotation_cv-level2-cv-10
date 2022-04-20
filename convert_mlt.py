@@ -10,8 +10,8 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 
 
-SRC_DATASET_DIR = '/data/datasets/ICDAR17_MLT'  # FIXME
-DST_DATASET_DIR = '/data/datasets/ICDAR17_Korean'  # FIXME
+SRC_DATASET_DIR = '/opt/ml/input/data/ICDAR17_MLT'  # FIXME
+DST_DATASET_DIR = '/opt/ml/input/data/ICDAR17_MLT'  # FIXME
 
 NUM_WORKERS = 32  # FIXME
 
@@ -29,7 +29,7 @@ def get_language_token(x):
 
 def maybe_mkdir(x):
     if not osp.exists(x):
-        os.makedirs(x)
+        os.makedirs(x, exist_ok=True)
 
 
 class MLT17Dataset(Dataset):
@@ -47,8 +47,14 @@ class MLT17Dataset(Dataset):
             assert label_path in label_paths
 
             words_info, extra_info = self.parse_label_file(label_path)
-            if 'ko' not in extra_info['languages'] or extra_info['languages'].difference({'ko', 'en'}):
+            # for ICDAR2017 MLT
+            # if 'ko' not in extra_info['languages'] or extra_info['languages'].difference({'ko', 'en'}):
+            #     continue
+            if 'ko' not in extra_info['languages'] and 'en' not in extra_info['languages']:
                 continue
+            if 'ko' not in extra_info['languages']:
+                if len(words_info) < 40:
+                    continue
 
             sample_ids.append(sample_id)
             samples_info[sample_id] = dict(image_path=image_path, label_path=label_path,
