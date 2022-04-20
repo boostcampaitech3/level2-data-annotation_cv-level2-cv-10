@@ -10,6 +10,8 @@ import albumentations as A
 from torch.utils.data import Dataset
 from shapely.geometry import Polygon
 
+from custom_aug import ComposedTransformation
+
 
 def cal_distance(x1, y1, x2, y2):
     '''calculate the Euclidean distance'''
@@ -386,6 +388,84 @@ class SceneTextDataset(Dataset):
 
 # for cross validation
 class SceneTextDataset_CV(Dataset):
+    def __init__(self, root_dir, split='train', image_size=1024, crop_size=800, color_jitter=True,
+                 normalize=True, validation=False):
+        with open(osp.join(root_dir, 'ufo/{}.json'.format(split)), 'r') as f:
+            anno = json.load(f)
+
+        self.anno = anno
+        self.image_fnames = sorted(anno['images'].keys())
+        self.image_dir = osp.join(root_dir, 'images')
+
+        self.image_size, self.crop_size = image_size, crop_size
+        self.color_jitter, self.normalize = color_jitter, normalize
+
+        self.validation = validation
+
+    def __len__(self):
+        return len(self.image_fnames)
+
+    def __getitem__(self, idx):
+        image_fname = self.image_fnames[idx]
+        image_fpath = osp.join(self.image_dir, image_fname)
+
+        vertices, labels = [], []
+        for word_info in self.anno['images'][image_fname]['words'].values():
+            vertices.append(np.array(word_info['points']).flatten())
+            labels.append(int(not word_info['illegibility']))
+        vertices, labels = np.array(vertices, dtype=np.float32), np.array(labels, dtype=np.int64)
+
+        vertices, labels = filter_vertices(vertices, labels, ignore_under=10, drop_under=1)
+
+        image = Image.open(image_fpath)
+
+        # validation set인 경우, augmentation은 기본만 준다.
+        if self.validation:
+            image, vertices = resize_img(image, vertices, self.image_size) # crop size로 바로 resize
+            image, vertices = adjust_height(image, vertices)
+            image, vertices = crop_img(image, vertices, labels, self.crop_size)
+
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            image = np.array(image)
+
+            funcs = []
+            if self.normalize:
+                funcs.append(A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
+            transform = A.Compose(funcs)
+
+        # train set인 경우, augmentation을 많이 준다.
+        else: 
+            image, vertices = resize_img(image, vertices, self.image_size)
+            image, vertices = adjust_height(image, vertices)
+            image, vertices = rotate_img(image, vertices, angle_range=60) # 10 -> 60
+            image, vertices = crop_img(image, vertices, labels, self.crop_size)
+
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            image = np.array(image)
+
+            funcs = []
+            funcs.append(A.OneOf([
+                A.Emboss(strength=(0.2, 0.4), p=1),
+                A.Sharpen(alpha=(0.2, 0.4), p=1)
+            ], p=0.85))
+            if self.color_jitter:
+                funcs.append(A.ColorJitter(0.15, 0.2, 0.2, 0.2))
+            funcs.append(A.GaussNoise(var_limit=20.0))
+            if self.normalize:
+                funcs.append(A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
+            transform = A.Compose(funcs)
+
+        image = transform(image=image)['image']
+        word_bboxes = np.reshape(vertices, (-1, 4, 2))
+        roi_mask = generate_roi_mask(image, vertices, labels)
+
+        return image, word_bboxes, roi_mask
+
+# for cross validation (custom aug)
+# 오류가 발생하여 사용하지 않는다.
+class SceneTextDataset_CV_custom(Dataset):
     def __init__(self, root_dir, split='train', image_size=1024, crop_size=512, color_jitter=True,
                  normalize=True, validation=False):
         with open(osp.join(root_dir, 'ufo/{}.json'.format(split)), 'r') as f:
@@ -397,6 +477,8 @@ class SceneTextDataset_CV(Dataset):
 
         self.image_size, self.crop_size = image_size, crop_size
         self.color_jitter, self.normalize = color_jitter, normalize
+
+        self.validation = validation
 
     def __len__(self):
         return len(self.image_fnames)
@@ -423,15 +505,34 @@ class SceneTextDataset_CV(Dataset):
             image = image.convert('RGB')
         image = np.array(image)
 
-        funcs = []
-        if self.color_jitter:
-            funcs.append(A.ColorJitter(0.5, 0.5, 0.5, 0.25))
-        if self.normalize:
-            funcs.append(A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
-        transform = A.Compose(funcs)
+        # validation set인 경우, augmentation은 기본만 준다.
+        if self.validation:
+            funcs = []
+            if self.color_jitter:
+                funcs.append(A.ColorJitter(0.15, 0.2, 0.2, 0.2))
+            if self.normalize:
+                funcs.append(A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
+            transform = A.Compose(funcs)
 
-        image = transform(image=image)['image']
-        word_bboxes = np.reshape(vertices, (-1, 4, 2))
+            image = transform(image=image)['image']
+            word_bboxes = np.reshape(vertices, (-1, 4, 2))
+            
+        # train set인 경우, augmentation을 많이 준다.
+        else: 
+            word_bboxes = np.reshape(vertices, (-1, 4, 2))
+            transform = ComposedTransformation(
+                rotate_range=30, crop_aspect_ratio=1.0, crop_size=(0.5, 0.5),
+                hflip=True, vflip=True, random_translate=True,
+                resize_to=768, # edit
+                min_image_overlap=0.9, min_bbox_overlap=0.99, min_bbox_count=1, allow_partial_occurrence=True,
+                max_random_trials=1000,
+                brightness=0.15, contrast=0.2, saturation=0.2, hue=0.2, # add
+                normalize=True, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), # add
+            )
+            transformed = transform(image=image, word_bboxes=word_bboxes)
+            image = transformed['image']
+            word_bboxes = transformed['word_bboxes']
+
         roi_mask = generate_roi_mask(image, vertices, labels)
 
         return image, word_bboxes, roi_mask
