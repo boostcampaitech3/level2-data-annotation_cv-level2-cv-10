@@ -11,12 +11,16 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
 - **Input** : 글자가 포함된 전체 이미지
 - **Output** : bbox 좌표가 포함된 UFO Format
 
+<br>
+
 ## 데이터셋 설명
 
 - ICDAR17_Korean
 - ICDAR17_MLT
 - AIStages
 - ICDAR19_MLT
+
+<br>
 
 ## 프로젝트 구조
 
@@ -67,6 +71,8 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
             |-- images
             `-- ufo
 ```
+
+<br>
 
 ## 실행 방법
 
