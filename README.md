@@ -1,5 +1,12 @@
 # [Lv2 P] Data Annotation :: #눈#사람
 
+## 팀원 소개
+| [김하준_T3066](https://github.com/HajunKim) | [송민수_T3113](https://github.com/sooya233) | [심준교_T3124](https://github.com/Shimjoonkyo) | [유승리_T3129](https://github.com/seungriyou) | [이창진_T3169](https://github.com/JasonLee-cp-zz) | [전영우_T3192](https://github.com/wowo0709) |
+|---|---|---|---|---|---|
+| ![눈사람_김하준](https://user-images.githubusercontent.com/43572543/164686306-5f2618e9-90b0-4446-a193-1c8e7f1d77ad.png) | ![눈사람_송민수](https://user-images.githubusercontent.com/43572543/164686145-4030fd4f-bdd1-4dfa-9495-16d7c7689731.png) | ![눈사람_심준교](https://user-images.githubusercontent.com/43572543/164686612-d221b3c9-8895-4ac4-af4e-385412afe541.png) | ![눈사람_유승리](https://user-images.githubusercontent.com/43572543/164686476-0b3374d4-1f00-419c-ae5a-ecd37227c1ef.png) | ![눈사람_이창진](https://user-images.githubusercontent.com/43572543/164686491-c7acc30f-7175-4ce5-b2ea-46059857d955.png) | ![눈사람_전영우](https://user-images.githubusercontent.com/43572543/164686498-d251b498-b3fa-4c3c-b5f9-7cd2b62ed58b.png) |
+
+<br>
+
 ## 대회 설명
 <img width="1095" alt="스크린샷 2022-04-22 오후 3 06 23" src="https://user-images.githubusercontent.com/43572543/164680573-0b6cf69a-e073-4650-b999-472f5ffe7ea6.png">
 
