@@ -13,7 +13,7 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
 
 <br>
 
-## 데이터셋 설명
+## 사용한 데이터셋
 
 - ICDAR17_Korean
 - ICDAR17_MLT
@@ -95,3 +95,13 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
     
     - `--experiment_name [실험이름]` - mlflow experiment를 생성한다.
     - `--validation 1` - validation을 수행한다.
+
+<br>
+
+## 날짜별 LB Score 변동
+
+<img width="371" alt="그림1" src="https://user-images.githubusercontent.com/43572543/164683780-9b6c29c3-51fd-420d-b7fa-2542dc155028.png">
+
+#### 최종 점수
+- **[Public]** f1 : 0.6583, recall : 0.5724, precision : 0.7745
+- **[Private]** f1 : 0.6377, recall : 0.5630, precision : 0.7352
