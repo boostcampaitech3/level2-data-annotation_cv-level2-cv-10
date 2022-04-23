@@ -17,6 +17,7 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
 - 본 대회에서는 '글자 검출' task 만을 해결하게 됩니다.
 - **Input** : 글자가 포함된 전체 이미지
 - **Output** : bbox 좌표가 포함된 UFO Format
+- **Model** : EAST (An Efficient and Accurate Scene Text Detector) 
 
 <br>
 
@@ -24,14 +25,14 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
 
 - ICDAR17_Korean
 - ICDAR17_MLT
-- AIStages
 - ICDAR19_MLT
+- AIStages
 
 <br>
 
 ## 프로젝트 구조
 
-> 본 repository의 `./data` 디렉토리를 제외한 파일은 아래 프로젝트 구조 중 `code` 디렉토리 내에 위치하는 파일이다.
+> 본 repository의 `./data` 디렉토리를 제외한 파일은 아래 프로젝트 구조 중 `code` 디렉토리 내에 위치하는 파일입니다.
 
 
 ```
@@ -48,9 +49,11 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
 |   |-- inference.py
 |   |-- loss.py
 |   |-- model.py
+|   |-- pths/
 |   |-- requirements.txt
 |   |-- seed.py
 |   |-- train.py
+|   |-- trained_models/
 |   |-- urls.txt
 |   `-- utils
 |       |-- 01-aistages-ann-download.ipynb
@@ -100,14 +103,14 @@ OCR task는 글자 검출 (text detection), 글자 인식 (text recognition), �
     python train.py --experiment_name --validation 1
     ```
     
-    - `--experiment_name [실험이름]` - mlflow experiment를 생성한다.
-    - `--validation 1` - validation을 수행한다.
+    - `--experiment_name [실험이름]` : mlflow experiment를 생성합니다.
+    - `--validation 1` : validation을 수행합니다.
 
 <br>
 
-## 날짜별 LB Score 변동
+## 날짜별 LB Score 변동 추이
 
-<img width="371" alt="그림1" src="https://user-images.githubusercontent.com/43572543/164683780-9b6c29c3-51fd-420d-b7fa-2542dc155028.png">
+<img width="371" alt="변동추이" src="https://user-images.githubusercontent.com/43572543/164683780-9b6c29c3-51fd-420d-b7fa-2542dc155028.png">
 
 #### 최종 점수
 - **[Public]** f1 : 0.6583, recall : 0.5724, precision : 0.7745
